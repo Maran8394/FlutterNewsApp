@@ -1,6 +1,4 @@
 class NetworkConstant {
   String url =
-      "https://newsapi.org/v2/top-headlines?country=in&apiKey=697b91f5ab2f49cab9eff333a8b03d86";
-  String country = "&country=";
-  String language = "&language=";
+      "https://newsdata.io/api/1/news?apikey=pub_8069abd863f97cdc7f223bc946af6702a313&language=en";
 }
