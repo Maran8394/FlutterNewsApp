@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:news/controls/asset_paths.dart';
 import 'package:news/screens/detail_page.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'dart:ui' as ui;
+import '../network_constants.dart';
+import '../networking.dart';
+import '../custom_functions/utils.dart';
+import '../widgets/image_render.dart';
 
 class HomePage extends StatefulWidget {
   final dynamic apiData;
@@ -14,99 +20,124 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String getImageUrl(String? url) {
-    if (url != null) {
-      return url;
-    } else {
-      return AssetPaths.dummyImage;
-    }
+  dynamic _apiData;
+  dynamic jsonData;
+  dynamic results;
+  final _controller = ScrollController();
+
+  void setArticles(dynamic data) {
+    _apiData = data;
+    jsonData = Map.from(_apiData);
+    results = jsonData['results'];
   }
 
-  String getContent(String description, String? content, String url) {
-    if (description != content) {
-      if (content == null) {
-        return url;
-      }
-      return content;
-    } else {
-      return url;
-    }
+  @override
+  void initState() {
+    super.initState();
+    setArticles(widget.apiData);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    print("STATE DESTROY");
+  }
+
+  Future<void> refreshCollectionItems() async {
+    int pageNo = randomPageNumber();
+    String pageUrl = NetworkConstant().url + "&page=$pageNo";
+    FetchNews news = FetchNews(url: pageUrl);
+    dynamic newsData = await news.getData();
+    setState(() {
+      setArticles(newsData);
+    });
+  }
+
+  String publishedDt(String strDt) {
+    DateTime parseDt = DateTime.parse(strDt);
+    var newFormat = DateFormat("yyyy-MM-dd h:mm:ss");
+    String updatedDt = newFormat.format(parseDt);
+    return updatedDt.toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    dynamic data = widget.apiData;
-    Map jsonData = Map.from(data);
-    dynamic results = jsonData['results'];
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text("Newsy"),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                for (var i = 0; i < results.length; i++) ...[
-                  InkWell(
-                    onTap: () {
-                      DetailsPage dd = DetailsPage(
-                        title: results[i]["title"],
-                        description: results[i]["description"],
-                        imageUrl: getImageUrl(results[i]['image_url']),
-                        content: getContent(
-                          results[i]['description'],
-                          results[i]['content'],
-                          results[i]['link'],
+        child: RefreshIndicator(
+          color: Colors.black,
+          onRefresh: refreshCollectionItems,
+          child: ListView(controller: _controller, children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < results.length; i++) ...[
+                    InkWell(
+                      onTap: () {
+                        DetailsPage dd = DetailsPage(
+                          articleData: results[i],
+                        );
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => dd));
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10.0),
+                        width: double.maxFinite,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10.0)),
                         ),
-                      );
-                      Navigator.push(
-                          context, MaterialPageRoute(builder: (context) => dd));
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          // top: BorderSide(
-                          //     width: 1.0, color: Colors.grey.shade400),
-                          bottom: BorderSide(
-                              width: 1.0, color: Colors.grey.shade400),
-                        ),
-                        // color: Colors.white,
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 150,
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(
-                                      10.0)), //add border radius here
-                              child: Image.network(
-                                  getImageUrl(results[i]['image_url'])),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            NewsImage(imageUrl: results[i]['image_url']),
+                            const SizedBox(height: 10),
+                            Text("${results[i]["title"]}",
+                                style: GoogleFonts.dmSans(
+                                  textStyle: const TextStyle(
+                                    color: Color(0xFF000000),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 20,
+                                    fontStyle: FontStyle.normal,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                                textAlign: TextAlign.left,
+                                textDirection: ui.TextDirection.ltr,
+                                maxLines: 5),
+                            const SizedBox(
+                              height: 5,
                             ),
-                          ),
-                          const SizedBox(height: 10.0),
-                          Text(
-                            "${results[i]["title"]}",
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 15.0),
-                          ),
-                        ],
+                            Text(
+                                "Published on : ${publishedDt(results[i]["pubDate"])}",
+                                style: GoogleFonts.dmSans(
+                                  textStyle: const TextStyle(
+                                    color: Color(0xFF000000),
+                                    fontSize: 13,
+                                    fontStyle: FontStyle.normal,
+                                  ),
+                                ),
+                                textAlign: TextAlign.left,
+                                textDirection: ui.TextDirection.ltr,
+                                maxLines: 2),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 15.0),
-                ]
-              ],
+                    const SizedBox(height: 15.0),
+                  ]
+                ],
+              ),
             ),
-          ),
+          ]),
         ),
       ),
     );

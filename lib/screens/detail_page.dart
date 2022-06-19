@@ -1,16 +1,12 @@
 import "package:flutter/material.dart";
+import 'package:google_fonts/google_fonts.dart';
+import '../widgets/image_render.dart';
 
 class DetailsPage extends StatefulWidget {
-  final String title;
-  final String imageUrl;
-  final String description;
-  final String? content;
+  final Map articleData;
 
   const DetailsPage({
-    required this.title,
-    required this.description,
-    required this.imageUrl,
-    this.content,
+    required this.articleData,
     Key? key,
   }) : super(key: key);
 
@@ -21,6 +17,7 @@ class DetailsPage extends StatefulWidget {
 class _DetailsPageState extends State<DetailsPage> {
   @override
   Widget build(BuildContext context) {
+    // var localizationDelegate = LocalizedApp.of(context).delegate;
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
@@ -33,24 +30,42 @@ class _DetailsPageState extends State<DetailsPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    height: 150,
-                    child: ClipRRect(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(10.0)),
-                      child: Image.network(widget.imageUrl),
+                  NewsImage(imageUrl: widget.articleData['image_url']),
+                  const SizedBox(height: 10.0),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(5.0),
+                    color: Colors.grey.shade100,
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.articleData['title'],
+                          style: GoogleFonts.dmSans(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        if (widget.articleData['description'] != null) ...[
+                          const SizedBox(height: 10.0),
+                          Text(
+                            widget.articleData['description'],
+                            style: GoogleFonts.dmSans(
+                              fontSize: 18.0,
+                            ),
+                          ),
+                        ],
+                        if (widget.articleData['content'] != null) ...[
+                          const SizedBox(height: 10.0),
+                          Text(
+                            widget.articleData['content'],
+                            style: GoogleFonts.dmSans(
+                              fontSize: 18.0,
+                            ),
+                          ),
+                        ]
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10.0),
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10.0),
-                  Text(widget.description),
-                  if (widget.content != null) const SizedBox(height: 10.0),
-                  Text(widget.content!),
                 ],
               ),
             ),
