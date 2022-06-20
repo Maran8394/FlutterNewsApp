@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:news/controls/asset_paths.dart';
-import 'package:news/screens/detail_page.dart';
+import 'package:news/network_constants.dart';
 
 class NewsImage extends StatelessWidget {
+  final String? imageUrl;
+  final dynamic keywords;
+  final dynamic category;
+
   const NewsImage({
     Key? key,
     required this.imageUrl,
+    this.keywords,
+    this.category,
   }) : super(key: key);
 
-  final String? imageUrl;
-
   String getImageUrl(dynamic url) {
+    String toReturn = AssetPaths.dummyImage;
+    NetworkConstant randomImage = NetworkConstant();
+    late String keyWord;
     if (url != null) {
       return url;
     } else {
-      return AssetPaths.dummyImage;
+      List? item = keywords ?? category;
+      if (item != null) {
+        keyWord = item[0];
+        return randomImage.randomImage + keyWord;
+      }
+      return toReturn;
     }
   }
 

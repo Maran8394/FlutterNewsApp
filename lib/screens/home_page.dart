@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> refreshCollectionItems() async {
     int pageNo = randomPageNumber();
-    String pageUrl = NetworkConstant().url + "&page=$pageNo";
+    String pageUrl = NetworkConstant().newsUrl + "&page=$pageNo";
     FetchNews news = FetchNews(url: pageUrl);
     dynamic newsData = await news.getData();
     setState(() {
@@ -98,7 +98,11 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            NewsImage(imageUrl: results[i]['image_url']),
+                            NewsImage(
+                              imageUrl: results[i]['image_url'],
+                              keywords: results[i]["keywords"],
+                              category: results[i]["category"],
+                            ),
                             const SizedBox(height: 10),
                             Text("${results[i]["title"]}",
                                 style: GoogleFonts.dmSans(
