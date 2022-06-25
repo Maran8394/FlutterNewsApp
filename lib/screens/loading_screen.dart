@@ -19,7 +19,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   void getDatas() async {
-    FetchNews news = FetchNews(url: NetworkConstant().newsUrl);
+    FetchNews news = FetchNews(url: NetworkConstant.newsUrl);
     dynamic newsData = await news.getData();
     Navigator.push(
         context,

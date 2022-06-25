@@ -16,7 +16,6 @@ class NewsImage extends StatelessWidget {
 
   String getImageUrl(dynamic url) {
     String toReturn = AssetPaths.dummyImage;
-    NetworkConstant randomImage = NetworkConstant();
     late String keyWord;
     if (url != null) {
       return url;
@@ -24,7 +23,7 @@ class NewsImage extends StatelessWidget {
       List? item = keywords ?? category;
       if (item != null) {
         keyWord = item[0];
-        return randomImage.randomImage + keyWord;
+        return NetworkConstant.randomImage + keyWord;
       }
       return toReturn;
     }
